@@ -6,6 +6,8 @@ const Todo = () => {
   // Crear un estado para almacenar el valor del input
   const [inputValue, setInputValue] = useState("");
 
+
+
   // Función para asegurarse de que el usuario existe
   const ensureUserExists = async () => {
     try {
@@ -33,6 +35,24 @@ const Todo = () => {
     }
   };
 
+  const fetchTodos = () => {
+    fetch("https://playground.4geeks.com/todo/users/marcel")
+      .then((response) => {
+        if (!response.ok)
+          throw new Error("Usuario no encontrado o error en la API");
+        return response.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data.todos)) {
+          setTodos(data.todos);
+        } else {
+          setTodos([]);
+        }
+      })
+      .catch((error) => console.error("Error al cargar tareas:", error));
+  };
+  
+
   // Usar useEffect para cargar las tareas al montar el componente
   // y asegurarse de que el usuario existe
   // Si el usuario no existe, lo creamos
@@ -40,27 +60,11 @@ const Todo = () => {
     const init = async () => {
       const userOk = await ensureUserExists();
       if (!userOk) return;
-
-      fetch("https://playground.4geeks.com/todo/users/marcel")
-        .then((response) => {
-          if (!response.ok)
-            throw new Error("Usuario no encontrado o error en la API");
-          return response.json();
-        })
-        .then((data) => {
-          if (Array.isArray(data.todos)) {
-            setTodos(data.todos);
-          } else {
-            console.warn("No se encontraron tareas para este usuario");
-            setTodos([]);
-          }
-        })
-        .catch((error) => console.error("Error al cargar tareas:", error));
+      fetchTodos();
     };
-
     init();
   }, []);
-
+  
   // Crear una función para manejar la adición de un nuevo elemento a la lista de tareas
   const addTodo = () => {
     if (inputValue.trim() === "") return;
@@ -95,12 +99,11 @@ const Todo = () => {
     })
       .then((response) => {
         if (!response.ok) throw new Error("Error al eliminar la tarea");
-        // Filtrar la tarea eliminada de la lista de tareas
-        setTodos(todos.filter((todo) => todo.id !== id));
+        fetchTodos(); // Recarga desde la API
       })
       .catch((error) => console.error("Error:", error));
   };
-
+  
   return (
     <div className="todo-app">
       <h1 className="text-center mt-5 todo-app__title">todos</h1>

@@ -15,6 +15,5 @@ import Test from "./components/Test.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Todo />
-    <Test />
   </React.StrictMode>
 );
