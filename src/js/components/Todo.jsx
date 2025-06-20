@@ -5,25 +5,63 @@ const Todo = () => {
   const [todos, setTodos] = useState([]);
   // Crear un estado para almacenar el valor del input
   const [inputValue, setInputValue] = useState("");
-  // Crear una función para manejar la adición de un nuevo elemento a la lista de tareas
-  useEffect(() => {
-    fetch("https://playground.4geeks.com/todo/users/marcel")
-      .then((response) => {
-        if (!response.ok)
-          throw new Error("Usuario no encontrado o error en la API");
-        return response.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data.todos)) {
-          setTodos(data.todos);
-        } else {
-          console.warn("No se encontraron tareas para este usuario");
-          setTodos([]); // ← muy importante: deja el array vacío si no hay tareas
+
+  // Función para asegurarse de que el usuario existe
+  const ensureUserExists = async () => {
+    try {
+      const res = await fetch(
+        "https://playground.4geeks.com/todo/users/marcel"
+      );
+      if (res.ok) return true;
+
+      // Si no existe el usuario, lo creamos
+      const createRes = await fetch(
+        "https://playground.4geeks.com/todo/users/marcel",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify([]),
         }
-      })
-      .catch((error) => console.error("Error al cargar tareas:", error));
+      );
+
+      if (!createRes.ok) throw new Error("No se pudo crear el usuario");
+      console.log("Usuario 'marcel' creado correctamente");
+      return true;
+    } catch (error) {
+      console.error("Error asegurando que el usuario existe:", error);
+      return false;
+    }
+  };
+
+  // Usar useEffect para cargar las tareas al montar el componente
+  // y asegurarse de que el usuario existe
+  // Si el usuario no existe, lo creamos
+  useEffect(() => {
+    const init = async () => {
+      const userOk = await ensureUserExists();
+      if (!userOk) return;
+
+      fetch("https://playground.4geeks.com/todo/users/marcel")
+        .then((response) => {
+          if (!response.ok)
+            throw new Error("Usuario no encontrado o error en la API");
+          return response.json();
+        })
+        .then((data) => {
+          if (Array.isArray(data.todos)) {
+            setTodos(data.todos);
+          } else {
+            console.warn("No se encontraron tareas para este usuario");
+            setTodos([]);
+          }
+        })
+        .catch((error) => console.error("Error al cargar tareas:", error));
+    };
+
+    init();
   }, []);
 
+  // Crear una función para manejar la adición de un nuevo elemento a la lista de tareas
   const addTodo = () => {
     if (inputValue.trim() === "") return;
 
@@ -53,7 +91,7 @@ const Todo = () => {
   // Crear una función para manejar la eliminación de un elemento de la lista de tareas
   const removeTodo = (id) => {
     fetch(`https://playground.4geeks.com/todo/todos/${id}`, {
-      method: "DELETE"
+      method: "DELETE",
     })
       .then((response) => {
         if (!response.ok) throw new Error("Error al eliminar la tarea");
