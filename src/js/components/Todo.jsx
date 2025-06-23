@@ -5,19 +5,15 @@ const Todo = () => {
   const [todos, setTodos] = useState([]);
   // Crear un estado para almacenar el valor del input
   const [inputValue, setInputValue] = useState("");
-
-
-
-  // Función para asegurarse de que el usuario existe
+  // Función para asegurarse de que el usuario existe (no lo require el ejercicio)
   const ensureUserExists = async () => {
     try {
       const res = await fetch(
         "https://playground.4geeks.com/todo/users/marcel"
       );
-      if (res.ok) return true;
-
+      if (res.ok) return true; // si es true aquí se detiene la función
       // Si no existe el usuario, lo creamos
-      const createRes = await fetch(
+      const createUser = await fetch(
         "https://playground.4geeks.com/todo/users/marcel",
         {
           method: "POST",
@@ -26,7 +22,7 @@ const Todo = () => {
         }
       );
 
-      if (!createRes.ok) throw new Error("No se pudo crear el usuario");
+      if (!createUser.ok) throw new Error("No se pudo crear el usuario");
       console.log("Usuario 'marcel' creado correctamente");
       return true;
     } catch (error) {
@@ -52,7 +48,6 @@ const Todo = () => {
       .catch((error) => console.error("Error al cargar tareas:", error));
   };
   
-
   // Usar useEffect para cargar las tareas al montar el componente
   // y asegurarse de que el usuario existe
   // Si el usuario no existe, lo creamos
@@ -64,7 +59,7 @@ const Todo = () => {
     };
     init();
   }, []);
-  
+
   // Crear una función para manejar la adición de un nuevo elemento a la lista de tareas
   const addTodo = () => {
     if (inputValue.trim() === "") return;
@@ -91,7 +86,6 @@ const Todo = () => {
       })
       .catch((error) => console.error("Error:", error));
   };
-
   // Crear una función para manejar la eliminación de un elemento de la lista de tareas
   const removeTodo = (id) => {
     fetch(`https://playground.4geeks.com/todo/todos/${id}`, {
