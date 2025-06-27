@@ -47,7 +47,7 @@ const Todo = () => {
       })
       .catch((error) => console.error("Error al cargar tareas:", error));
   };
-  
+
   // Usar useEffect para cargar las tareas al montar el componente
   // y asegurarse de que el usuario existe
   // Si el usuario no existe, lo creamos
@@ -97,7 +97,26 @@ const Todo = () => {
       })
       .catch((error) => console.error("Error:", error));
   };
-  
+  // Crear una función para eliminar todas las tareas
+  const removeAllTodos = async () => {
+    try {
+      const res = await fetch(
+        "https://playground.4geeks.com/todo/users/marcel",
+        {
+          method: "DELETE",
+        }
+      );
+      if (!res.ok) throw new Error("Error al eliminar el usuario");
+
+      const userOk = await ensureUserExists();
+      if (userOk) {
+        setTodos([]);
+      }
+    } catch (error) {
+      console.error("Error al eliminar y crear el usuario de nuevo:", error);
+    }
+  };
+
   return (
     <div className="todo-app">
       <h1 className="text-center mt-5 todo-app__title">todos</h1>
@@ -135,7 +154,10 @@ const Todo = () => {
         <div className="card card--layer3"></div>
         <div className="card card--layer2"></div>
         <div className="card card--main todo-app__footer">
-          <p>Tareas pendientes: {todos.length}</p>
+          <span>Tareas pendientes: {todos.length}</span>
+          <span onClick={removeAllTodos}>
+            Eliminar tareas <i className="fa-solid fa-recycle"></i>
+          </span>
         </div>
       </div>
     </div>
